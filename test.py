@@ -1,5 +1,5 @@
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, MultiPolygon
 
-p1 = Point(10,10)
-p2 = Point(30,5)
-p1
+a = Polygon([(0,0),(1,1),(0,1)])
+
+print(a)
