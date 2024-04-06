@@ -1,26 +1,2 @@
-from itertools import combinations
-
-def get_combinations(items, n):
-  """
-  This function returns all possible combinations of n items from a list.
-
-  Args:
-      items: A list of items to generate combinations from.
-      n: The number of items to include in each combination.
-
-  Returns:
-      A list of tuples representing all possible combinations.
-  """
-
-  if n > len(items):
-    return []  # Handle case where n is greater than the list length
-  return list(combinations(items, n))
-
-# Example usage
-items = [i for i in range(15)]
-n = 7
-
-combinations = get_combinations(items, n)
-
-for combo in combinations:
-  print(combo)
+MULTIPOLYGON (((-1.188 0.315, -1.179 0.324, -1.17 0.324, -1.188 0.306, -1.188 0.315)),
+            ((-1.035 0.693, -0.972 0.765, -0.9089999999999999 0.837, -0.837 0.9089999999999999, -0.756 0.963, -0.6749999999999999 1.017, -0.585 1.053, -0.495 1.089, -0.396 1.1159999999999999, -0.369 1.107, -0.279 1.089, -0.315 1.062, -0.396 0.999, -0.468 0.9359999999999999, -0.531 0.864, -0.594 0.783, -0.63 0.72, -0.693 0.729, -0.7919999999999999 0.72, -0.882 0.711, -0.981 0.6839999999999999, -1.053 0.657, -1.035 0.693)))
