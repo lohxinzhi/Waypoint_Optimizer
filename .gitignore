@@ -11,6 +11,7 @@
 # Ignore log files and temp files
 *.log
 *.tmp
+__pycache__/*
 
 # Ignore system files
 Thumbs.db
