@@ -63,37 +63,45 @@ def randomColor():
     b = random()
     return (r,g,b)
 
-def visualiseScene(polygons = [], points = [], show_table = False, table = Polygon(((-1,-0.5),(-1, 0.5),(1, 0.5),(1,-0.5))), xlim = [-3,3], ylim = [-2,2]):
+def visualiseScene(regions = [], waypoints = [], plates = [], show_table = False, tables = [Polygon(((-1,-0.5),(-1, 0.5),(1, 0.5),(1,-0.5)))], xlim = [-3,3], ylim = [-2,2]):
     colors = []
     x_range = xlim[1] - xlim[0] 
     y_range = ylim[1] - ylim[0]
-    fig, ax = plt.subplots(figsize = (x_range + 2, y_range + 2 ))
+    fig, ax = plt.subplots(figsize = (x_range, y_range ))
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     ax.set_title('Shapely Polygons Visualization')
 
     # Draw polygons
-    for polygon in polygons:
+    for polygon in regions:
         if not polygon.is_empty:
         # color
             ax.add_patch(PlotPolygon(xy=polygon.exterior.coords, edgecolor='black', facecolor=randomColor(), alpha = 0.5))
         
-        # grey
-        # ax.add_patch(PlotPolygon(xy=polygon.exterior.coords, edgecolor='black', facecolor='black', alpha = 0.1))
     
     
     # Draw Rectangle (Table)
     if show_table:
-        ax.add_patch(PlotPolygon(xy=table.exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
+        for table in unary_union(tables).geoms:
+            ax.add_patch(PlotPolygon(xy=table.buffer(0.3).exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
+
+        for (i, table) in enumerate(tables):
+            ax.add_patch(PlotPolygon(xy=table.exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
+
     
     # Draw points
-    for point in points:
-        plt.scatter(point[0],point[1], color ="black")      
+    for point in waypoints:
+        plt.scatter(point[0],point[1], color ="black")
+        circle = Circle(point[0], point[1], 1)
+        ax.add_patch(PlotPolygon(xy=circle.exterior.coords, edgecolor='black', facecolor='black', alpha = 0.2))            
         
+    # Draw poitnts for plates
+    for point in plates:
+        plt.scatter(point[0],point[1], color ="grey") 
 
     plt.show()
 
-
+## Original function definition --> too inefficient
 # def getIntersectRegions(polygons): ## polygons is the list of all polygon
 #     return_list = []
 #     for iteration in range (len (polygons)):
@@ -129,9 +137,14 @@ def getIntersectRegions(polygons):
     return return_list
 
 
-def ExcludeTableRegion(regions, table = Polygon(((-1,-0.5),(-1, 0.5),(1, 0.5),(1,-0.5))) ):
+def ExcludeTableRegion(regions, tables = [Polygon(((-1,-0.5),(-1, 0.5),(1, 0.5),(1,-0.5)))] ):
     results = []
     for region in regions:
+        if len(tables) > 1:
+            table  = unary_union(tables)
+        else:
+            table = tables[0]
+
         result = difference(region, table.buffer(0.3))
         if not result.is_empty:
             if type(result) == MultiPolygon:
@@ -139,7 +152,6 @@ def ExcludeTableRegion(regions, table = Polygon(((-1,-0.5),(-1, 0.5),(1, 0.5),(1
                     results.append(poly)
             else:
                 results.append(result)
-        
     return results
 
 
