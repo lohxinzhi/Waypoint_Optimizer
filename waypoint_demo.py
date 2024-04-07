@@ -5,6 +5,7 @@ from waypoint import getNearestPlate, getBestRegion, updateRegions
 import time
 from shapely.geometry import Polygon
 
+
 ## Set up plates
 
 plate_coords = [    
@@ -220,4 +221,4 @@ print("Process time = ",time.time()-start_time)
 
 # visualiseScene(regions=z, waypoints=waypoints+[start_point], plates=centers_list, show_table=True, tables=table, xlim=[0,22], ylim=[2,10])
 
-visualiseScene(waypoints=waypointss, plates=centers_list, show_table=True, tables=table, xlim=[0,22], ylim=[2,10])
+visualiseScene(waypoints=waypoints, plates=centers_list, show_table=True, tables=table, xlim=[0,22], ylim=[2,10])
