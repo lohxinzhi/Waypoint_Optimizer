@@ -208,14 +208,20 @@ while len(plates_remain) > 0:
     n1, d1 = getNearestPlate(waypoints[count], plates_remain)
     best_region, best_region_qty, best_region_area = getBestRegion(n1)
     waypoints.append(best_region.center)
-    printID(best_region.member_plate)
+    # printID(best_region.member_plate)
     updateRegions(Z, best_region.member_plate)
     plates_remain = [plate for plate in plates_remain if plate.id not in [plate.id for plate in best_region.member_plate]]
     # printID(plates_remain)
-    print()
+    # print()
     # print(len(plates_remain))
     
     count +=1
+    
+## post process optimisation
+
+
+
+
 print("Process time = ",time.time()-start_time)
 # print(waypoints)
 

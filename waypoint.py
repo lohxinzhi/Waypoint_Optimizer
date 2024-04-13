@@ -23,9 +23,21 @@ class Region:
 
     def __str__(self):
         return f"Region Center: {self.center}"
-    
+
+class Waypoints:
+    def __init__(self,x=0,y=0, plates=[], id=-1) :
+        self.x = x
+        self.y = y
+        self.center = (x,y)
+        self.id = id
+        self.member_plate = plates
+
+    def __str__(self):
+        return f"Waypoint {self.id}, center: {self.center}"
+
+
 class Plate:
-    def __init__(self, x=0, y=0, radius=1, id=0):
+    def __init__(self, x=0, y=0, radius=1, id=0, waypoint = Waypoints()):
         self.id = id
         self.x = x
         self.y = y
@@ -33,10 +45,14 @@ class Plate:
         self.center = (x,y)
         self.polygon = Circle(x,y,radius)
         self.intersect_regions = []
+        self.waypoint = waypoint
 
     def __str__(self):
         return f"Plate ID: {self.id}, center: {self.center}"
     
+
+
+
     ## Make circle function as polygon
 def Circle(x, y, radius):
     return Point(x,y).buffer(radius)
