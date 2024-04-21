@@ -8,6 +8,7 @@ from random import random, randrange
 from math import comb, dist
 from itertools import combinations
 import copy
+import time
 
 
 
@@ -63,41 +64,49 @@ def randomColor():
     b = random()
     return (r,g,b)
 
-def visualiseScene(regions = [], waypoints = [], plates = [], show_table = False, tables = [Polygon(((-1,-0.5),(-1, 0.5),(1, 0.5),(1,-0.5)))], xlim = [-3,3], ylim = [-2,2]):
+def visualiseScene(regions = [], waypoints = [], show_wp_radius = True, plates = [], show_plate_radius = False, show_table = False, show_table_buffer = True, tables = [Polygon(((-1,-0.5),(-1, 0.5),(1, 0.5),(1,-0.5)))], xlim = [-3,3], ylim = [-2,2]):
     colors = []
     x_range = xlim[1] - xlim[0] 
     y_range = ylim[1] - ylim[0]
     fig, ax = plt.subplots(figsize = (x_range, y_range ))
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
-    ax.set_title('Shapely Polygons Visualization')
+    # ax.set_title('Shapely Polygons Visualization')
+    ax.set_title('')
+       
+    # Draw Rectangle (Table)
+    if show_table:
+        all_table = unary_union(tables)
+        if show_table_buffer:
+            if type(all_table) == MultiPolygon:
+                for table in unary_union(tables).geoms:
+                    ax.add_patch(PlotPolygon(xy=table.buffer(0.3).exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
+            else:
+                ax.add_patch(PlotPolygon(xy=all_table.buffer(0.3).exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
+
+        for (i, table) in enumerate(tables):
+            ax.add_patch(PlotPolygon(xy=table.exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
 
     # Draw polygons
     for polygon in regions:
         if not polygon.is_empty:
         # color
             ax.add_patch(PlotPolygon(xy=polygon.exterior.coords, edgecolor='black', facecolor=randomColor(), alpha = 0.5))
-        
-    
-    
-    # Draw Rectangle (Table)
-    if show_table:
-        for table in unary_union(tables).geoms:
-            ax.add_patch(PlotPolygon(xy=table.buffer(0.3).exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
-
-        for (i, table) in enumerate(tables):
-            ax.add_patch(PlotPolygon(xy=table.exterior.coords, edgecolor='black', facecolor='white', alpha = 1))
-
     
     # Draw points
     for point in waypoints:
-        plt.scatter(point[0],point[1], color ="black")
-        circle = Circle(point[0], point[1], 1)
-        ax.add_patch(PlotPolygon(xy=circle.exterior.coords, edgecolor='black', facecolor='black', alpha = 0.2))            
+        plt.scatter(point[0],point[1], color ="black", marker='x')
+        if show_wp_radius:
+            circle = Circle(point[0], point[1], 1)
+            ax.add_patch(PlotPolygon(xy=circle.exterior.coords, edgecolor='black', facecolor='black', alpha = 0.2))            
         
     # Draw poitnts for plates
     for point in plates:
-        plt.scatter(point[0],point[1], color ="grey") 
+        plt.scatter(point[0],point[1], color ="black") ## initially grey
+        if show_plate_radius:
+            circle = Circle(point[0], point[1], 1)
+            ax.add_patch(PlotPolygon(xy=circle.exterior.coords, edgecolor='black', facecolor='black', alpha = 0.1))            
+        
 
     plt.show()
 
@@ -120,11 +129,12 @@ def visualiseScene(regions = [], waypoints = [], plates = [], show_table = False
 #     return return_list
 
 
-def getIntersectRegions(polygons):
+def getIntersectRegions(polygons): #O(n^2 or higher, depend on polygons)
     
-    poly_list = [intersection(a,b) for a, b in combinations(polygons, 2)]
-    rings = [LineString(list(poly.exterior.coords)) for poly in poly_list]
-    return_list = [geom for geom in polygonize(unary_union(rings))]
+    poly_list = [intersection(a,b) for a, b in combinations(polygons, 2)]   ## combination is O(n^2), intersection complexity varies depending on 
+                                                                            ## polygons properties, such as number of vertices, spatial distribution of vertices, geometric relations 
+    rings = [LineString(list(poly.exterior.coords)) for poly in poly_list]  
+    return_list = [geom for geom in polygonize(unary_union(rings))]         ## O(k) where k is the number of vertices 
     union_poly = unary_union(return_list)
     for polygon in polygons:
         temp = difference(polygon, union_poly)

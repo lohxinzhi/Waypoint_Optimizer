@@ -7,19 +7,9 @@ from shapely.geometry import Polygon
 
 
 ## Set up plates
+start_time = time.time()
 
 plate_coords = [    
-        # (0.69136,-0.03378),
-        # (0.46042,-0.31386),
-        # (0.23854,0.22787),
-        # (-0.07518,-0.28684),
-        # (-0.20048,0.13328),
-        # (0.63731,0.25367),
-        # (0.21473,0.04484),
-        # (-0.69118,-0.27422),
-        # (-0.824,0.26879),
-        # (-0.39502,-0.31306),
-        # (-0.5668,0.13019),
 
         [(15.73467022725663,4.466218948364258),
         (15.503726049400663,4.186137711389996),
@@ -166,8 +156,6 @@ plate_coords = [
         (6.6009891234544815,7.635408138197993)]
         ]
 
-# plates = CreatePlateScene(plate_coords[0]+plate_coords[1]+plate_coords[2])
-
 plates = CreatePlateScene([i for j in plate_coords for i in j])
 
 table = [Polygon(((14,4.0),(14, 5.0),(16, 5.0),(16,4.0))),
@@ -190,14 +178,16 @@ table = [Polygon(((14,4.0),(14, 5.0),(16, 5.0),(16,4.0))),
 
 start_point = (20,6) # robot start point
 
-poly_list = [plate.polygon for plate in plates]
-centers_list = [plate.center for plate in plates]
+poly_list = [plate.polygon for plate in plates]  ## O(n)
+centers_list = [plate.center for plate in plates]  #O(n)
+int_time_0 = time.time()
 
 print("processing...\n")
-start_time = time.time()
 x = getIntersectRegions(poly_list)
 z = ExcludeTableRegion(x,table)
+int_time_1 = time.time()
 Z = LinkRegionAndPlate(z, plates)
+int_time_2 = time.time()
 
 
 plates_remain = [plate for plate in plates]
@@ -205,20 +195,25 @@ plates_remain = [plate for plate in plates]
 waypoints = [start_point]
 count = 0
 while len(plates_remain) > 0:
-    n1, d1 = getNearestPlate(waypoints[count], plates_remain)
-    best_region, best_region_qty, best_region_area = getBestRegion(n1)
+    n1, d1 = getNearestPlate(waypoints[count], plates_remain) ## O(n)
+    best_region, best_region_qty, best_region_area = getBestRegion(n1) ## O(m)
     waypoints.append(best_region.center)
-    printID(best_region.member_plate)
-    updateRegions(Z, best_region.member_plate)
+    # printID(best_region.member_plate)
+    updateRegions(Z, best_region.member_plate) ## O(n*m)
     plates_remain = [plate for plate in plates_remain if plate.id not in [plate.id for plate in best_region.member_plate]]
     # printID(plates_remain)
-    print()
+    # print()
     # print(len(plates_remain))
     
     count +=1
-print("Process time = ",time.time()-start_time)
-# print(waypoints)
+int_time_3 = time.time()    
 
-# visualiseScene(regions=z, waypoints=waypoints+[start_point], plates=centers_list, show_table=True, tables=table, xlim=[0,22], ylim=[2,10])
+
+print(f"Time for 0      = {int_time_0 - start_time}")
+print(f"Time for 1      = {int_time_1 - int_time_0}")
+print(f"Time for 2      = {int_time_2 - int_time_1}")
+print(f"Time for 3      = {int_time_3 - int_time_2}")
+print(f"Time for all    = {int_time_3 - start_time}")
+
 
 visualiseScene(waypoints=waypoints, plates=centers_list, show_table=True, tables=table, xlim=[0,22], ylim=[2,10])
